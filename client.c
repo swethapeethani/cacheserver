@@ -18,12 +18,6 @@ void *clientthread(void *param)
 
     struct sockaddr_in servaddr;
     servaddr.sin_family = AF_INET;
-
-    //inet_pton(AF_INET,"127.0.0.1", &servaddr.sin_addr); //!=0)
-    //{
-    //     perror("Error inet_aton");
-    //     return;
-    // }
     servaddr.sin_addr.s_addr = INADDR_ANY;
     servaddr.sin_port = htons(8089);
 
@@ -39,9 +33,47 @@ void *clientthread(void *param)
     send(sockdescriptor, &request, sizeof(request), 0);
     printf("data is Request %c , key %s  , buff %s  \n ", request.data_request, request.key, request.buff);
     printf(" Sent the data\n");
-    bzero(&request, sizeof(request));
+    memset(&request, 0, sizeof(request));
     close(sockdescriptor);
     pthread_exit(NULL);
+}
+
+
+void read_data()
+{
+    struct cachedata cdata;
+    pthread_t tid;
+    memset(&cdata, 0, sizeof(cdata));
+    cdata.data_request = 'r';
+    printf("Enter the key :");
+    scanf("%10s", cdata.key);
+    printf("key is %s and its size is %ld \n", cdata.key, wcslen(&cdata.key));
+
+    pthread_create(&tid, NULL,
+                   clientthread,
+                   &cdata);
+
+    pthread_join(tid, NULL);
+}
+
+void write_data()
+{
+    struct cachedata cdata;
+    pthread_t tid;
+    memset(&cdata, 0, sizeof(cdata));
+    cdata.data_request = 'w';
+    printf("Enter the key:");
+    scanf("%10s", cdata.key);
+    printf("Enter the data: ");
+    scanf(" %50s", cdata.buff);
+    printf("data in buffer is %s\n", cdata.buff);
+
+    pthread_create(&tid, NULL,
+                   clientthread,
+                   &cdata);
+    printf("Created the write thread\n");
+
+    pthread_join(tid, NULL);
 }
 
 int main()
@@ -53,50 +85,16 @@ int main()
     {
         int choice;
         scanf("%d", &choice);
-        pthread_t tid;
-
-        struct cachedata cdata;
-
         switch (choice)
         {
         case 1:
         {
-            memset(&cdata,0,sizeof(cdata));
-            cdata.data_request = 'r';
-            printf("Enter the key :");
-            scanf("%s", cdata.key);
-            printf("key is %s and its size is %ld \n", cdata.key, strlen(cdata.key));
-
-
-            pthread_create(&tid, NULL,
-                           clientthread,
-                           &cdata);
-
-
-            pthread_join(tid, NULL);
+            read_data();
             break;
         }
         case 2:
         {
-            memset(&cdata,0,sizeof(cdata));
-            cdata.data_request = 'w';
-            printf("Enter the key:");
-            scanf("%s", cdata.key);
-            printf("Enter the data: ");
-            scanf(" %s", cdata.buff);
-            printf("\n");
-            int len = strlen(cdata.buff);
-
-            cdata.buff[len] = '\0';
-            puts(cdata.buff);
-            printf("data in buffer is %s\n", cdata.buff);
-
-            pthread_create(&tid, NULL,
-                           clientthread,
-                           &cdata);
-            printf("Created the write thread\n");
-  
-            pthread_join(tid, NULL);
+            write_data();
             break;
         }
         default:

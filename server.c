@@ -27,11 +27,8 @@ struct thread_data
     int connfd;
 };
 
-sem_t sem1, sem2;
+sem_t sem1;
 pthread_t thread_id[50];
-//pthread_t thread_id;
-//pthread_t wthreads[50];
-//pthread_t rthreads[50];
 int count;
 
 void *readfn(void *param)
@@ -45,49 +42,42 @@ void *readfn(void *param)
     }
     else
     {
-        //int current_value =0;
-        //pthread_id_np_t tid;
-        //tid = pthread_getthreadid_np();
-        struct llist *temp;
+        
         sem_wait(&sem1);
-        for (temp = head; temp != NULL; temp = temp->next)
+
+        for (struct llist *temp = head; temp != NULL; temp = temp->next)
         {
             if (strcmp(temp->key, tdata.cdata->key) == 0)
             {
-                strcpy(tdata.cdata->buff, temp->value);
+                strncpy(tdata.cdata->buff, temp->value,strlen(temp->value));
                 key_found = 1;
                 break;
             }
         }
         sem_post(&sem1);
+
         if (key_found == 1)
         {
             send(tdata.connfd, tdata.cdata, sizeof(tdata.cdata), 0);
-
             printf("sent the data with key %s and  value is %s \n", tdata.cdata->key, tdata.cdata->buff);
         }
         else
         {
             printf("the key %s is not found in the server data\n", tdata.cdata->key);
         }
-
         pthread_exit(NULL);
     }
 }
 
 void *writefn(void *param)
 {
-    //int current_value =0;
-    //pthread_id_np_t tid;
-    //tid = pthread_getthreadid_np();
-
     printf("In writefn of server\n");
 
     struct thread_data tdata = *((struct thread_data *)param);
     struct llist *node = (struct llist *)malloc(sizeof(struct llist));
     struct llist *temp;
-    strcpy(node->key, tdata.cdata->key);
-    strcpy(node->value, tdata.cdata->buff);
+    strncpy(node->key, tdata.cdata->key,strlen(tdata.cdata->key));
+    strncpy(node->value, tdata.cdata->buff,strlen(tdata.cdata->buff));
 
     sem_wait(&sem1);
 
@@ -118,7 +108,7 @@ void *writefn(void *param)
     }
 
     sem_post(&sem1);
-    bzero(&tdata, sizeof(tdata));
+    memset(&tdata,0, sizeof(tdata));
 
     printf("write thread executed and node updated in the list with key %s , value %s  \n", node->key, node->value);
     pthread_exit(NULL);
@@ -126,14 +116,13 @@ void *writefn(void *param)
 
 int main()
 {
-    int servsock, clientsock;
+    int servsock;
     struct sockaddr_in servaddr;
     struct sockaddr_storage serv_storage;
     socklen_t addr_size;
 
     sem_init(&sem1, 0, 1);
-    sem_init(&sem2, 0, 1);
-
+    
     if ((servsock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         perror("Socket failed");
@@ -143,7 +132,6 @@ int main()
     if (setsockopt(servsock, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &optval, sizeof(optval)))
     {
         perror("setsockopt");
-        //exit(-1);
     }
 
     servaddr.sin_family = AF_INET;
@@ -166,7 +154,8 @@ int main()
         perror("listen fail");
     }
 
-    int i = 0, j = 0;
+    int i = 0;
+    int clientsock = 0;
     while (1)
     {
         addr_size = sizeof(serv_storage);
@@ -180,12 +169,6 @@ int main()
             printf("Accept succesfull");
         }
 
-        //int option =0;
-        // struct llist node;
-        // if(head == NULL)
-        // {
-        //     head = &node;
-        // }
         if (recv(clientsock, &cdata, sizeof(cdata), 0) < 0)
         {
             perror("receive error");
