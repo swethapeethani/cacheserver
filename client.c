@@ -80,6 +80,9 @@ int main()
                            &cdata);
 
             //sleep(20);
+            // Suspend execution of
+            // calling thread
+            pthread_join(tid, NULL);
             break;
         }
         case 2:
@@ -109,15 +112,14 @@ int main()
                            &cdata);
             //printf("Created the write thread\n");
             //sleep(5);
+            // Suspend execution of
+            // calling thread
+            pthread_join(tid, NULL);
             break;
         }
         default:
             printf("Invalid Input\n");
             break;
         }
-
-        // Suspend execution of
-        // calling thread
-        pthread_join(tid, NULL);
     }
 }
