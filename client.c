@@ -48,72 +48,54 @@ int main()
 {
     printf("1. Read\n");
     printf("2. Write\n");
-    //printf("3.Update");
 
     while (1)
     {
-        // Input
         int choice;
         scanf("%d", &choice);
         pthread_t tid;
 
         struct cachedata cdata;
 
-        // Create connection
-        // depending on the input
         switch (choice)
         {
         case 1:
         {
-            bzero(&cdata, sizeof(cdata));
+            memset(&cdata,0,sizeof(cdata));
             cdata.data_request = 'r';
             printf("Enter the key :");
             scanf("%s", cdata.key);
-
             printf("key is %s and its size is %ld \n", cdata.key, strlen(cdata.key));
-            //printf("Enter data for the key %s",cdata.key);
-            //fgets(cdata.buff, sizeof(cdata.buff), stdin);
 
-            // Create thread
+
             pthread_create(&tid, NULL,
                            clientthread,
                            &cdata);
 
-            //sleep(20);
-            // Suspend execution of
-            // calling thread
+
             pthread_join(tid, NULL);
             break;
         }
         case 2:
         {
-            bzero(&cdata, sizeof(cdata));
+            memset(&cdata,0,sizeof(cdata));
             cdata.data_request = 'w';
             printf("Enter the key:");
             scanf("%s", cdata.key);
-            int len = strlen(cdata.key);
-            //bzero(cdata.buff,sizeof(cdata.buff));
-            //fflush(stdin);
             printf("Enter the data: ");
             scanf(" %s", cdata.buff);
             printf("\n");
-            //fflush(stdin);
-
-            //fgets(cdata.buff, sizeof(cdata.buff),stdin);
-            len = strlen(cdata.buff);
+            int len = strlen(cdata.buff);
 
             cdata.buff[len] = '\0';
             puts(cdata.buff);
             printf("data in buffer is %s\n", cdata.buff);
 
-            // Create thread
             pthread_create(&tid, NULL,
                            clientthread,
                            &cdata);
-            //printf("Created the write thread\n");
-            //sleep(5);
-            // Suspend execution of
-            // calling thread
+            printf("Created the write thread\n");
+  
             pthread_join(tid, NULL);
             break;
         }

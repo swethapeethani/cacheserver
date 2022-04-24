@@ -41,6 +41,7 @@ void *readfn(void *param)
     if (head == NULL)
     {
         printf(" There is no data available\n");
+        return -1;
     }
     else
     {
