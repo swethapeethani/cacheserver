@@ -42,7 +42,6 @@ void *clientthread(void *param)
     bzero(&request, sizeof(request));
     close(sockdescriptor);
     pthread_exit(NULL);
-    return 0;
 }
 
 int main()
