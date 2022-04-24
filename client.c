@@ -71,7 +71,7 @@ int main()
             printf("Enter the key :");
             scanf("%s", cdata.key);
 
-            printf("key is %s and its size is %d \n", cdata.key, strlen(cdata.key));
+            printf("key is %s and its size is %ld \n", cdata.key, strlen(cdata.key));
             //printf("Enter data for the key %s",cdata.key);
             //fgets(cdata.buff, sizeof(cdata.buff), stdin);
 
